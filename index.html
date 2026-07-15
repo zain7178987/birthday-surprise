@@ -29,7 +29,10 @@
             height: 100%;
             overflow-x: hidden;
             background: var(--bg-dark);
+            -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
         }
+        /* some Android browsers paint a highlight from focus, not just tap */
+        button:focus, button:focus-visible { outline: none; }
 
         body {
             font-family: 'Montserrat', sans-serif;
