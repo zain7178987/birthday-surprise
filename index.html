@@ -888,9 +888,10 @@
                     "خوشیوں کا سفر کبھی تھم نہ پائے تیرا۔\n" +
                     "رب کی رحمتوں کا سایہ سدا رہے تجھ پر،\n" +
                     "ہر نیا برس گزشتہ سے بہتر آئے تیرا۔",
-            // Put a path to your own song here (e.g. "song.mp3" next to this file).
-            // Leave "" to use YouTube (below) or the built-in melody.
-            musicSrc: "",
+            // Path to the song file next to this page; starts at musicStart seconds
+            // (1:20 = 80) and loops back there. Set "" to fall back to YouTube/melody.
+            musicSrc: "song.mp3",
+            musicStart: 80,
             // YouTube song: video id + start time in seconds (1:30 = 90).
             // Priority: musicSrc > youtube > built-in melody. Set id: "" to disable.
             youtube: { id: "", start: 90 },
@@ -1104,8 +1105,10 @@
                 && location.protocol !== "file:";   // the YT API doesn't work off local files
             if (CONFIG.musicSrc) {
                 audioEl = new Audio(CONFIG.musicSrc);
-                audioEl.loop = true;
                 audioEl.volume = 0.75;
+                const s = CONFIG.musicStart || 0;
+                audioEl.addEventListener("loadedmetadata", () => { audioEl.currentTime = s; });
+                audioEl.addEventListener("ended", () => { audioEl.currentTime = s; audioEl.play(); });
                 audioEl.play();
             } else if (wantsYT) {
                 // wait up to 6s for the player instead of instantly falling back
