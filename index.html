@@ -17,7 +17,12 @@
             --bulb-glow: rgba(255, 222, 107, 0.8);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;   /* no gray/blue flash on tap */
+        }
 
         html, body {
             width: 100%;
@@ -30,6 +35,9 @@
             font-family: 'Montserrat', sans-serif;
             color: #fff;
             perspective: 1000px;
+            user-select: none;              /* no text-selection magnifier on long-press */
+            -webkit-user-select: none;
+            touch-action: manipulation;     /* no double-tap zoom delay on buttons */
         }
 
         /* ---------- Starfield behind everything ---------- */
@@ -1009,6 +1017,16 @@
         let audioEl = null, actx = null, masterGain = null, songTimer = null;
         let ytPlayer = null, ytReady = false, usingYT = false, ytFailed = false;
 
+        // Preload the song while she's on the early scenes, already seeked to the
+        // start point — so it plays the instant she taps the record.
+        if (CONFIG.musicSrc) {
+            audioEl = new Audio(CONFIG.musicSrc);
+            audioEl.preload = "auto";
+            audioEl.volume = 0.75;
+            audioEl.addEventListener("loadedmetadata", () => { audioEl.currentTime = CONFIG.musicStart || 0; });
+            audioEl.addEventListener("ended", () => { audioEl.currentTime = CONFIG.musicStart || 0; audioEl.play(); });
+        }
+
         // Load the official YouTube player (needs internet); the song starts
         // at CONFIG.youtube.start and loops back there when the video ends.
         if (!CONFIG.musicSrc && CONFIG.youtube && CONFIG.youtube.id) {
@@ -1104,12 +1122,7 @@
             const wantsYT = !CONFIG.musicSrc && CONFIG.youtube && CONFIG.youtube.id
                 && location.protocol !== "file:";   // the YT API doesn't work off local files
             if (CONFIG.musicSrc) {
-                audioEl = new Audio(CONFIG.musicSrc);
-                audioEl.volume = 0.75;
-                const s = CONFIG.musicStart || 0;
-                audioEl.addEventListener("loadedmetadata", () => { audioEl.currentTime = s; });
-                audioEl.addEventListener("ended", () => { audioEl.currentTime = s; audioEl.play(); });
-                audioEl.play();
+                audioEl.play();   // preloaded at page load, already at the start point
             } else if (wantsYT) {
                 // wait up to 6s for the player instead of instantly falling back
                 const t0 = Date.now();
@@ -1143,7 +1156,11 @@
             if (!musicStarted) return;
             musicStarted = false;
             clearTimeout(songTimer);
-            if (audioEl) { audioEl.pause(); audioEl = null; }
+            if (audioEl) {
+                audioEl.pause();
+                audioEl.muted = false;
+                audioEl.currentTime = CONFIG.musicStart || 0;   // ready for the next run
+            }
             if (usingYT && ytPlayer) {
                 ytPlayer.pauseVideo();
                 document.getElementById("yt-holder").classList.remove("show");
