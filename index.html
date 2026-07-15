@@ -642,6 +642,7 @@
             font-size: 1.05rem;
             min-height: 9.5em;
             text-align: left;
+            white-space: pre-line;   /* keeps the letter's paragraph breaks */
         }
         .letter-card p::after {
             content: "▍";
@@ -841,9 +842,9 @@
     <!-- Scene 6: Letter -->
     <section class="page" id="letter">
         <div class="letter-card rise" style="--d:0.15s">
-            <h2 class="script">Dear You,</h2>
+            <h2 class="script" id="letter-heading">Dear You,</h2>
             <p id="letter-text"></p>
-            <div class="letter-sign script" id="letter-sign">— With love</div>
+            <div class="letter-sign script" id="letter-sign">— With sincere duas &amp; best wishes</div>
         </div>
         <button class="btn rise" style="--d:0.5s" data-next="blessings">My Wishes for You</button>
     </section>
@@ -861,7 +862,7 @@
     <section class="page" id="finale">
         <canvas id="fx-canvas"></canvas>
         <h2 class="finale-title script rise" style="--d:0.2s">Happiest of Birthdays!</h2>
-        <p class="kicker rise" style="--d:0.5s; margin-top:1rem">Here's to many more scenes together</p>
+        <p class="kicker rise" style="--d:0.5s; margin-top:1rem">Wishing you a wonderful year ahead and a lifetime of blessings</p>
         <button class="btn rise" style="--d:0.8s" data-next="hero" id="replay-btn">Replay the Magic</button>
     </section>
 
@@ -871,30 +872,42 @@
            ========================================================= */
         const CONFIG = {
             name: "SunShine",
-            signature: "— With love",
-            letter: "Every year the world gets one more day with you in it, and that " +
-                    "alone is worth celebrating. Thank you for the laughter, the patience, " +
-                    "and all the small moments that turned into my favorite memories. " +
-                    "Today the spotlight is entirely yours — enjoy every second of it.",
+            signature: "— With sincere duas & best wishes",
+            letter: "Happy Birthday! 🎉\n\n" +
+                    "On your special day, I pray that Allah blesses you with good health, endless happiness, " +
+                    "success in every step of your life, and countless opportunities to achieve your dreams. " +
+                    "May He protect you from every difficulty, fill your heart with peace, and grant you " +
+                    "wisdom, strength, and barakah in everything you do.\n\n" +
+                    "You are someone who deserves great respect for your kindness, character, and the " +
+                    "positivity you bring to those around you. May your coming years be brighter than the " +
+                    "ones before, and may every new chapter of your life be filled with joy, meaningful " +
+                    "achievements, and beautiful memories.\n\n" +
+                    "Stay true to yourself, keep smiling, and continue inspiring others with your grace and " +
+                    "sincerity. Wishing you a wonderful year ahead and a lifetime of blessings.\n\n" +
+                    "چراغِ قسمت ہمیشہ روشن رہے تیرا،\n" +
+                    "خوشیوں کا سفر کبھی تھم نہ پائے تیرا۔\n" +
+                    "رب کی رحمتوں کا سایہ سدا رہے تجھ پر،\n" +
+                    "ہر نیا برس گزشتہ سے بہتر آئے تیرا۔",
             // Put a path to your own song here (e.g. "song.mp3" next to this file).
             // Leave "" to use YouTube (below) or the built-in melody.
             musicSrc: "",
             // YouTube song: video id + start time in seconds (1:30 = 90).
             // Priority: musicSrc > youtube > built-in melody. Set id: "" to disable.
             youtube: { id: "", start: 90 },
-            adviceNote: "Before this show ends, here is a little note from my heart to yours — " +
-                        "a few wishes and blessings I want you to carry with you into this new year of your life.",
+            adviceNote: "Before this show ends, here are a few duas, wishes, and blessings " +
+                        "for you to carry with you into this new year of your life.",
             blessings: [
                 { emoji: "🌟", text: "May every dream you chase this year finally slow down enough for you to catch it." },
                 { emoji: "😊", text: "Never stop smiling — it is the one thing that makes every room you enter brighter." },
                 { emoji: "💪", text: "On the hard days, remember how far you have already come. You are stronger than you think." },
                 { emoji: "🕊️", text: "May peace find you first, before anything else does — in your heart, your home, and your mind." },
                 { emoji: "🍀", text: "May good health hold you close, luck walk beside you, and happiness never leave your side." },
-                { emoji: "❤️", text: "And no matter what happens, remember — you will always have someone cheering for you. Me." },
+                { emoji: "🤲", text: "And no matter what happens, remember — you will always have someone praying for your success. Me." },
             ],
         };
 
         document.getElementById("hero-name").textContent = CONFIG.name;
+        document.getElementById("letter-heading").textContent = "Dear " + CONFIG.name + ",";
         document.getElementById("letter-sign").textContent = CONFIG.signature;
 
         /* ---------- Scene navigation ---------- */
@@ -966,7 +979,7 @@
         for (let i = 0; i < 14; i++) {
             const h = document.createElement("span");
             h.className = "heart";
-            h.textContent = ["❤️", "💖", "💕"][i % 3];
+            h.textContent = ["🎈", "✨", "⭐"][i % 3];
             h.style.left = Math.random() * 100 + "vw";
             h.style.animationDuration = 6 + Math.random() * 8 + "s";
             h.style.animationDelay = Math.random() * 8 + "s";
@@ -1207,7 +1220,7 @@
             for (let i = 0; i < 10; i++) {
                 const b = document.createElement("span");
                 b.className = "burst-heart";
-                b.textContent = ["💖", "✨", "💛"][i % 3];
+                b.textContent = ["🎉", "✨", "⭐"][i % 3];
                 b.style.setProperty("--dx", (-90 + Math.random() * 180) + "px");
                 b.style.setProperty("--dy", (-90 - Math.random() * 120) + "px");
                 b.style.setProperty("--rot", (-120 + Math.random() * 240) + "deg");
@@ -1252,12 +1265,13 @@
             letterEl.classList.remove("done");
             let i = 0;
             typeTimer = setInterval(() => {
-                letterEl.textContent = CONFIG.letter.slice(0, ++i);
+                i = Math.min(i + 2, CONFIG.letter.length);
+                letterEl.textContent = CONFIG.letter.slice(0, i);
                 if (i >= CONFIG.letter.length) {
                     clearInterval(typeTimer);
                     letterEl.classList.add("done");
                 }
-            }, 32);
+            }, 16);
         }
 
         /* ---------- Wishes & Blessings ---------- */
